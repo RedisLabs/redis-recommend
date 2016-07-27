@@ -8,7 +8,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-// Redrec struct hold the engine parameters
+// Redrec struct
 type Redrec struct {
 	rconn redis.Conn
 }
@@ -56,7 +56,7 @@ func (rr *Redrec) Rate(item string, user string, score float64) error {
 // GetUserSuggestions return the existing user
 //suggestions range for a given user as a []string
 func (rr *Redrec) GetUserSuggestions(user string, max int) ([]string, error) {
-	items, err := redis.Strings(rr.rconn.Do("ZRANGE", fmt.Sprintf("user:%s:suggestions", user), 0, max, "WITHSCORES"))
+	items, err := redis.Strings(rr.rconn.Do("ZREVRANGE", fmt.Sprintf("user:%s:suggestions", user), 0, max, "WITHSCORES"))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,6 @@ func (rr *Redrec) BatchUpdateSimilarUsers(max int) error {
 	}
 	for _, user := range users {
 		candidates, err := rr.getSimilarityCandidates(user, max)
-		fmt.Println("similarity candidates: ", candidates)
 		args := []interface{}{}
 		args = append(args, fmt.Sprintf("user:%s:similars", user))
 		for _, candidate := range candidates {
@@ -85,7 +84,6 @@ func (rr *Redrec) BatchUpdateSimilarUsers(max int) error {
 			}
 		}
 
-		fmt.Println("zadd args: ", args)
 		_, err = rr.rconn.Do("ZADD", args...)
 		if err != nil {
 			fmt.Println("ZADD ERR: ", err)
@@ -112,7 +110,6 @@ func (rr *Redrec) UpdateSuggestedItems(user string, max int) error {
 		args = append(args, item)
 	}
 
-	fmt.Println("zadd suggest args: ", args)
 	_, err = rr.rconn.Do("ZADD", args...)
 	if err != nil {
 		fmt.Println("ZADD ERR: ", err)
@@ -140,7 +137,6 @@ func (rr *Redrec) CalcItemProbability(user string, item string) (float64, error)
 		return 0, nil
 	}
 
-	fmt.Println("scores: ", scores)
 	var score float64
 	for i := 1; i < len(scores); i += 2 {
 		val, _ := strconv.ParseFloat(scores[i], 64)
@@ -182,7 +178,6 @@ func (rr *Redrec) getSimilarityCandidates(user string, max int) ([]string, error
 		args = append(args, fmt.Sprintf("item:%s:scores", items[i]))
 	}
 
-	fmt.Println("args:", args)
 	_, err = rr.rconn.Do("ZUNIONSTORE", args...)
 	if err != nil {
 		return nil, err
@@ -219,7 +214,6 @@ func (rr *Redrec) getSuggestCandidates(user string, max int) ([]string, error) {
 
 	args = append(args, weights...)
 	args = append(args, "AGGREGATE", "MIN")
-	fmt.Println("getSuggestCandidates args:", args)
 	_, err = rr.rconn.Do("ZUNIONSTORE", args...)
 	if err != nil {
 		return nil, err
@@ -229,7 +223,6 @@ func (rr *Redrec) getSuggestCandidates(user string, max int) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("candidates: ", candidates)
 
 	_, err = rr.rconn.Do("DEL", "ztmp")
 	if err != nil {
@@ -256,7 +249,6 @@ func (rr *Redrec) calcSimilarity(user string, simuser string) (float64, error) {
 		return 0, nil
 	}
 
-	fmt.Println("userDiffs: ", userDiffs)
 	var score float64
 	for i := 1; i < len(userDiffs); i += 2 {
 		diffVal, _ := strconv.ParseFloat(userDiffs[i], 64)
