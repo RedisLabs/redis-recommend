@@ -30,7 +30,7 @@ Options:
 
 	arguments, _ := docopt.Parse(usage, nil, true, "redis-recommend", false)
 
-	rr, err = redrec.New("tcp://localhost:6379")
+	rr, err = redrec.New("redis://localhost:6379")
 	chekErrorAndExit(err)
 
 	if arguments["rate"].(bool) {
@@ -54,7 +54,7 @@ Options:
 		suggest(user, results)
 	}
 
-	if arguments["update"].(bool) {
+	if arguments["batch-update"].(bool) {
 		results, err := strconv.Atoi(arguments["--results"].(string))
 		chekErrorAndExit(err)
 		update(results)
