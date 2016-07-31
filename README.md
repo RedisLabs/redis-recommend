@@ -103,13 +103,9 @@ ZRANGE ztmp 0 -1
 
 Now we need to calculate the similarity for each of the candidates. 
 Assuming user U1 and U2, we want the RMS of all the diffs in the ratings of the item rated by both users.
-
 Redis gives us ZINTERSTORE so we can get the intersection between U1 and U2 items. 
-
 But how will we calculate the diff?  
-
 This can be achieved by using weights.
-
 Multiplying U1's ratings by -1 and U2's ratings by 1 will give us the diff:
 
 ```
@@ -117,18 +113,12 @@ ZINTERSTORE ztmp 2 user:U1:items user:U2:items WEIGHTS 1 -1
 ```
 
 After calculating the RMS in the client the results will be stored in user:U1:similars
-
 Now that we have a sorted set of U1's similar users, we can extract the items that the similar users rated.
-
 We'll do this with ZUNIONSTORE with all U1's similar users, but how can we make sure to exclude all the items U1 has already rated?
-
 Weights are going to be used again, this time with the AGGREGATE option and ZRANGEBYSCORE command.
-
 Multiplying U1's items by -1 and all the others by 1 and specifying the AGGREGATE MIN option will yield a sorted set that is easy to cut:
-
 All U1's item scores will be negative while the other users item scores will be positive.
-
-With ZRANGEBYSCORE we will fetch the items with a score > 0, giving us just what we wanted.
+With ZRANGEBYSCORE we will fetch the items with a score greater than 0, giving us just what we wanted.
 
 Assuming U1 with similar users U3,U5,U6:
 
@@ -147,16 +137,7 @@ ZINTERSTORE ztmp 2 user:U1:similars item:I:scores WEIGHTS 0 1
 
 ## The Code
 
-![alt text](http://blog.wiser.com/wp-content/uploads/2014/07/tumblr_lu7nekn38a1qfvq9bo1_500.jpg "Logo Title Text 1")
+TBD
 
-
-```go
-
-	weights = append(weights, "WEIGHTS", -1.0)
-	for _, simuser := range similarUsers {
-		args = append(args, fmt.Sprintf("user:%s:items", simuser))
-		weights = append(weights, 1.0)
-	}
-```	
 
 
