@@ -3,9 +3,15 @@
 
 ###
 
+## About
+This is a simple recommendation engine written in [Go](https://golang.org/) using [Redis](http://redis.io). The Redis client Go library used is [Redigo](https://github.com/garyburd/redigo).
+
+The aim of this projects is to demonstrate some Redis use cases, mainly sorted set operations. It is not intended to be a production level recommendation engine.
+
 ## What is a recommendation engine?
-A recommendation engine is a system that can predict what items each user would be interested in from given a set of items. 
-Recommendation engines are used in a variety of applications ranging from e-commerce to online dating. 
+Recommendation engine is a system feature that tries to predict what items each user in the system would be interested in from the system's set of items.
+Recommendation engines are used in a variety of applications ranging from e-commerce to online dating, 
+and are a key part of many online applications, trying to achieve a taylor-made fit between the user's personal prefernces and the items he is offered.   
 
 ## The algorithm
 There are two basic approaches for building recommendation engines:
@@ -135,9 +141,27 @@ To get all the rates of item I given user U1's similars we shall intersect the t
 ZINTERSTORE ztmp 2 user:U1:similars item:I:scores WEIGHTS 0 1 
 ```
 
-## The Code
+## Usage
 
-TBD
+Rate an item:
 
+```
+redis-recommend rate <user> <item> <score>  
+```
 
+Find (n) similar users for all users:
+
+```
+redis-recommend batch-update [--results=<n>]
+```
+
+Get (n) suggested items for a user:
+```
+redis-recommend suggest <user> [--results=<n>]
+```
+
+Get the probable score a user would give to an item:
+```
+redis-recommend get-probability <user> <item>
+```
 
