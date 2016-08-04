@@ -14,13 +14,13 @@ There are two basic approaches for building recommendation engines:
  This approach relies on classification by a large number of item and user attributes, assigning each user to possible classes of items.
   * pros: 
 
-       - Can be very targeted 
-	   - Allows detailed control to the system owner
-	   - Does not require the user`s history.
+		- Can be very targeted 
+		- Allows detailed control to the system owner
+		- Does not require the user`s history.
 
   * cons:
 
-       	- Requires deep knowledge of the items
+    	- Requires deep knowledge of the items
 	   	- Complicated data model
 	   	- A lot of manual work to enter the items
 		- Usually requires the user to enter a lot of details
