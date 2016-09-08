@@ -119,7 +119,8 @@ func (rr *Redrec) UpdateSuggestedItems(user string, max int) error {
 	return nil
 }
 
-// CalcItemProbability todo
+// CalcItemProbability takes all the user`s similars that rated the input item
+// and calculates the average score.
 func (rr *Redrec) CalcItemProbability(user string, item string) (float64, error) {
 	_, err := rr.rconn.Do("ZINTERSTORE",
 		"ztmp", 2, fmt.Sprintf("user:%s:similars", user), fmt.Sprintf("item:%s:scores", item), "WEIGHTS", 0, 1)
@@ -171,7 +172,6 @@ func (rr *Redrec) getSimilarityCandidates(user string, max int) ([]string, error
 		max = len(items)
 	}
 
-	//TODO use redis.Args, use redigo Send, Flush, Receive
 	args := []interface{}{}
 	args = append(args, "ztmp", float64(max))
 	for i := 0; i < max; i++ {
